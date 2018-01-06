@@ -11,47 +11,75 @@ const int maxn = 100000 + 20;
 const int moder = 1e9 + 7;
 
 struct Solution {
-  int dx[4] = {-1, 1, 0, 0};
-  int dy[4] = {0, 0, -1, 1};
-
   int n, m, r, k;
-  pair<ll, pair<int, int>> calc(int x, int y) {
-    
+  struct node {
+    double value;
+    pair<int, int> pii;
+
+    bool operator < (const node & rhs) const {
+      return value < rhs.value;
+    }
+  } ;
+  node get_info(const pair<int, int> &pii) {
+    int x = pii.first;
+    int y = pii.second;
+
+
+    int lbx = max(1, x - r + 1);
+    int ubx = min(x, n - r + 1);
+    int lby = max(1, y - r + 1);
+    int uby = min(y, m - r + 1);
+
+    double value = 1.0 *  (ubx - lbx + 1) /(n - r + 1) * 1.0 * (uby - lby + 1) / (m - r + 1);
+    return (node){value, pii};
   }
 
+  bool inside(int x, int y) {
+    if (x < 1 || x > n || y < 1 || y > m) return 0;
+
+    return 1;
+  }
   void work(istream &in, ostream &out) {
     in >> n >> m >> r >> k;
-
+  
+    map<pair<int, int>, bool> vis;
     pair<int, int> mid = {(n + 1) / 2, (m + 1) / 2};
-
-    map<pair<int, int>, int> mep;
-    mep.insert({mid, 1});
-    priority_queue<pair<ll, pair<int, int>>> Q;
+    priority_queue<node> Q;
+    Q.push(get_info(mid));
+    vis[mid] = 1;
 
     double ans = 0;
     while (k--) {
-      auto T = Q.top();
-      Q.pop();
-      ans += T.first * 1.0 / (n - r + 1) * 1.0 / (m -r + 1);
-      int x = T.second.first;
-      int y = T.second.second;
-      for (int i = 0; i < 4; ++i) {
-        int tx = x + dx[i];
-        int ty = y + dy[i];
-        pair<int, int> tpii = {tx, ty};
-        if (tx >= 1 && tx <= n && ty >= 1 && ty <= m) {
-          if (mep.find(tpii) == mep.end()) {
-            Q.push(calc(tx, ty));
-            mep[tpii] = 1;
+      auto T = Q.top(); Q.pop();
+
+      ans += T.value;
+
+      int x = T.pii.first;
+      int y = T.pii.second;
+
+
+      for (int dx = -1; dx <= 1; ++dx) {
+        for (int dy = -1; dy <= 1; ++dy) {
+          if (dx == 0 && dy == 0) {
+            continue;
+          }
+          int tx = x + dx;
+          int ty = y + dy;
+          pair<int, int> tp = {tx, ty};
+          if (inside(tx, ty) 
+              && !vis.count(tp)) {
+            vis[tp] = 1;
+            node tn = get_info(tp);
+            Q.push(tn);
           }
         }
       }
     }
-    
-    out << setprecision(10) << ans << endl;
-  } 
+    out << setiosflags(ios::fixed);
+    out << setprecision(12) << ans << endl;
+  }
 
-} ; 
+} ;
 Solution Woo;
 int main() {
   ios_base::sync_with_stdio(0);
