@@ -13,7 +13,16 @@ const int moder = 1e9 + 7;
 struct Solution {
 
   void work() {
+    int n;
+    cin >> n;
 
+    int sum = 0;
+    for (int i = 0; i < n; ++i) {
+      int x;
+      cin >> x;
+      sum += x;
+    }
+    cout << sum / n << endl;
   }
 
 } ; 
@@ -23,3 +32,4 @@ int main() {
   cin.tie(0); cout.tie(0);
   Woo.work();
 }
+

@@ -13,7 +13,19 @@ const int moder = 1e9 + 7;
 struct Solution {
 
   void work() {
+    int T;
+    cin >> T;
 
+    while (T--) {
+      int n, m;
+      cin >> n >> m;
+
+      if (m % n == 0) {
+        cout << n << endl;
+        continue;
+      }
+      cout << m % n << endl;
+    }
   }
 
 } ; 
@@ -23,3 +35,4 @@ int main() {
   cin.tie(0); cout.tie(0);
   Woo.work();
 }
+

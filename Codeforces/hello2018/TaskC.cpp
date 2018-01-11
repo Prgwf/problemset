@@ -12,71 +12,37 @@ const int moder = 1e9 + 7;
 
 struct Solution {
 
-  const ll llinf = 1e18;
   void work(istream &in, ostream &out) {
-    int n, L;
+    int n;
+    ll L;
     in >> n >> L;
-
     vector<ll> c;
-    c.resize(32, llinf);
+    c.resize(50);
 
     for (int i = 0; i < n; ++i) {
       in >> c[i];
     }
-
-
-    for (int i = 30; i >= n; --i) {
-      for (int j = 0; j < n; ++j) {
-        c[i] = min(c[i], c[j] * (1LL << (i - j)));
-      }
-    }
-    for (int i = 0; i <= 30; ++i) {
-      for (int j = 0; j < i; ++j) {
-        c[i] = min(c[i], c[j] * (1LL << (i -j)));
-      }
-      for (int j = i + 1; j <= 30; ++j) {
-        c[i] = min(c[i], c[j]);
-      }
+    
+    for (int i = 1; i < n; ++i) {
+      c[i] = min(c[i], c[i  -1] * 2);
     }
 
-
-    vector<ll> dp[2];
-    dp[0].assign(32, 0);
-    dp[1].assign(32, 0);
-
-    ll ans = llinf;
-    int lowbit = 0;
-    for (int i = 0; i <= 30; ++i) {
-      if (L >> i & 1) {
-        lowbit = i;
-        break;
-      }
+    for (int i = n - 2; i >= 0; --i) {
+      c[i] = min(c[i], c[i + 1]);
     }
-    for (int i = 30; i > lowbit; --i) {
-      if (L >> i & 1) {
-        if (dp[0][i + 1] != -1) {
-          ans = min(ans, dp[0][i + 1] + c[i] * 2LL);  
-          dp[1][i] = dp[0][i + 1] + c[i];
-        } else {
-          ans = min(ans, dp[1][i + 1] + c[i] * 2LL);
-          dp[1][i] = dp[1][i + 1] + c[i];
-        }
-        dp[0][i] = -1;
-      } else {
-        if (dp[0][i + 1] != -1) {
-          ans = min(ans, dp[0][i + 1] + c[i]);
-          dp[0][i] = dp[0][i + 1];
-        } else {
-          ans = min(ans, dp[1][i + 1] + c[i]);
-          dp[0][i] = dp[1][i + 1];
-        }
-        dp[1][i] = -1;
-      }
+
+    for (int i = n; i < 31; ++i) {
+      c[i] = c[i - 1] * 2;
     }
-    if (dp[0][lowbit + 1] != -1) {
-      ans = min(ans, dp[0][lowbit + 1] + c[lowbit]);
-    } else {
-      ans = min(ans, dp[1][lowbit + 1] + c[lowbit]);
+
+    ll ans = 0;
+    for (int i = 0; i < 31; ++i) {
+      if (ans > c[i]) {
+        ans = c[i];
+      }
+      if ((L >> i) & 1) {
+        ans += c[i];
+      }
     }
 
     out << ans;
