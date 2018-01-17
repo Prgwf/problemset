@@ -26,6 +26,10 @@ struct info {
   bool operator < (const info & rhs) const {
     return h < rhs.h;
   }
+
+  bool operator == (const info & rhs) const {
+    return l == rhs.l && r == rhs.r && h == rhs.h && t == rhs.t;
+  }
 } ;
 vector<info> a[1005];
 vector<int> xset[1005];
@@ -86,7 +90,7 @@ int main() {
     for (int i = 0; i <= 1000; ++i) {
       xset[i].clear();
       a[i].clear();
-    } 
+    }
 
     int n;
     scanf("%d", &n);
@@ -124,20 +128,32 @@ int main() {
       sort(xset[i].begin(), xset[i].end());
       xset[i].erase(unique(xset[i].begin(), xset[i].end()), xset[i].end());
     }
-    
-    int ans = 0;
+
+    int ans = 0, pre;
     for (int z = z1; z <= z2; ++z) {
       build(0, xset[z].size() + 5);
       vector<info> & line = a[z];
+      if (z > z1 && a[z - 1].size() == a[z].size()) {
+        int siz = a[z].size();
+        for (int i = 0; i < siz; ++i) {
+          if (!(a[z][i] == a[z - 1][i])) {
+            break;
+          }
+        }
+        ans += pre;
+        continue;
+      }
+      pre = 0;
       int siz = line.size();
       for (int i = 0; i < siz - 1; ++i) {
         int l = lower_bound(xset[z].begin(), xset[z].end(), line[i].l) - xset[z].begin();
         int r = lower_bound(xset[z].begin(), xset[z].end(), line[i].r) - xset[z].begin();
         update(z, l, r, line[i].t);
-        ans += seg[1].sum * (line[i + 1].h - line[i].h);
+        pre += seg[1].sum * (line[i + 1].h - line[i].h);
       }
+      ans += pre;
     }
-    
+
     printf("Scenario #%d:\n%d\n", ++kase, ans);
     puts("");
   }
