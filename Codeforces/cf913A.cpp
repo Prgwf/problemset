@@ -16,7 +16,7 @@ struct Solution {
     ll n, m;
     in >> n >> m;
 
-    
+
     ll x = 1LL, i = 0;
     while (x <= m) {
       x *= 2LL;
@@ -28,9 +28,9 @@ struct Solution {
       return;
     }
     out << m % (int)pow(2, n);
-  } 
+  }
 
-} ; 
+} ;
 Solution Woo;
 int main() {
   ios_base::sync_with_stdio(0);
