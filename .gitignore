@@ -4,6 +4,7 @@
 *.xml
 *.txt
 *.JPEG
+*.exe
 
 .vscode
 today
