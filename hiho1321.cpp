@@ -1,29 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define fi first
-#define se second
-#define all(x) (x).begin(), (x).end()
-typedef long long ll;
-const ll mod = 1000000007;
-ll powmod(ll a, ll b) {
-  ll res = 1;
-  a %= mod;
-  assert(b >= 0);
-  for (; b; b >>= 1) {
-    if (b & 1) res = res * a % mod;
-    a = a * a % mod;
-  }
-  return res;
-}
-ll gcd(ll a, ll b) { return b ? gcd(b, a % b) : a; }
 
-const int maxn = 200 + 20;
-const int maxr = 200 + 20;
+typedef long long ll;
+
+const int INF = 0x3f3f3f3f;
+const int maxn = 2000 + 20;
+const int maxr = 2000 + 20;
 const int maxnode = 2e5 + 20;
 struct DLX {
-
-#define FOR(i, A, s) for (int i = A[s]; i != s; i = A[i])
-
   int U[maxnode], D[maxnode], L[maxnode], R[maxnode];
   int row[maxnode], col[maxnode];
   int S[maxn], H[maxr], ans[maxr], ansd, sz;
@@ -99,33 +83,75 @@ struct DLX {
   }
 } dlx;
 
-int main(int argc, char const *argv[]) {
-  // freopen("data.in", "r", stdin);
 
+int mat[10][10];
+vector<int> ans;
+void Encode(int i, int j, int k) {
+  int id = (i - 1) * 9 + j; // 格子编号
+  int pid = (id - 1) * 9 + k; // 格子填k的方案编号
+
+  /* 对于第i行第j列填写数字k时，其对应的序号为(i-1)*9+k */
+  dlx.addNode(pid, (i - 1) * 9 + k);
+
+  /* 对于第i行第j列填写数字k时，其对应的序号为81+(j-1)*9+k */
+  dlx.addNode(pid, 81 + (j - 1) * 9 + k);
+
+  /* 对于第i行第j列填写数字k时，位于第t个九宫，其对应的序号为162+(t-1)*9+k */
+  int t = ((i - 1) / 3 * 3 + (j - 1) / 3) + 1;
+  dlx.addNode(pid, 162 + (t - 1) * 9 + k);
+
+  /* 对于第i行第j列填写数字k时，其对应的序号为243+(i-1)*9+j */
+  dlx.addNode(pid, 243 + id);
+
+}
+void Decode(int x, int &i, int &j, int &k) {
+  x--;
+
+  k = x % 9; x /= 9;
+  j = x % 9; x /= 9;
+  i = x % 9;
+  i++; j++; k++;
+}
+void Build() {
+  for (int i = 1; i <= 9; ++i) {
+    for (int j = 1; j <= 9; ++j) {
+      if (mat[i][j]) {
+        Encode(i, j, mat[i][j]);
+      } else {
+        for (int k = 1; k <= 9; ++k) {
+          Encode(i, j, k);
+        }
+      }
+    }
+  }
+}
+
+int main(int argc, char const *argv[]) {
   int T;
   scanf("%d", &T);
 
   while (T--) {
-    int n, m;
-    scanf("%d %d", &n, &m);
+    dlx.init(9*9*9, 9*9*4);
 
-    dlx.init(n, m);
-
-    for (int i = 1; i <= n; ++i) {
-      for (int j = 1; j <= m; ++j) {
-        int x; scanf("%d", &x);
-        if (x) dlx.addNode(i, j);
+    for (int i = 1; i <= 9; ++i) {
+      for (int j = 1; j <= 9; ++j) {
+        scanf("%d", &mat[i][j]);
       }
     }
 
-    vector<int> ans;
-    dlx.dance(ans);
-    if (ans.size()) {
-      cout << "Yes";
-    } else {
-      cout << "No";
+    Build();
+    vector<int> line;
+    dlx.dance(line);
+    for (int x : line) {
+      static int i, j, k;
+      Decode(x, i, j, k);
+      mat[i][j] = k;
     }
-    cout << endl;
+
+    for (int i = 1; i <= 9; ++i) {
+      for (int j = 1; j <= 9; ++j) {
+        printf("%d%c", mat[i][j], j < 9 ? ' ' : '\n');
+      }
+    }
   }
-  return 0;
 }
