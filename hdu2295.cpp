@@ -12,6 +12,7 @@ int rx[N], ry[N], cx[N], cy[N];
 bool mat[N][N];
 double dist[N][N];
 int n, m, k;
+
 struct DXL {
   int n, m, id;
   int U[N*N], D[N*N], L[N*N], R[N*N];
@@ -72,7 +73,7 @@ struct DXL {
         remove(j);
       }
       if (dance(d + 1, limit)) return true;
-      for (int j = L[i]; j != i; j = L[i]) {
+      for (int j = L[i]; j != i; j = L[j]) {
         restore(j);
       }
       restore(i);
@@ -85,7 +86,6 @@ struct DXL {
       L[R[i]] = L[i];
       R[L[i]] = R[i];
     }
-
   }
   void restore(int c) {
     for (int i = U[c]; i != c; i = U[i]) {
@@ -93,7 +93,7 @@ struct DXL {
     }
   }
 
-  bool check() {
+  int check() {
     memset(vis, 0, sizeof(vis));
     int ret = 0;
     for (int c = R[0]; c != 0; c = R[c]) vis[c] = true;
@@ -118,11 +118,18 @@ bool check(double x) {
   for (int i = 1; i <= m; ++i) {
     for (int j = 1; j <= n; ++j) {
       if (dist[i][j] <= x) {
-        mat[i][j] = x;
+        mat[i][j] = 1;
       }
     }
   }
-  // todo
+
+  dlx.init(m, n);
+  for (int i = 1; i <= m; ++i) {
+    for (int j = 1; j <= n; ++j) {
+      if (mat[i][j]) dlx.link(i, j);
+    }
+  }
+  return dlx.dance(0, k);
 }
 int main() {
   int T;
@@ -156,4 +163,5 @@ int main() {
     }
     printf("%.6f\n", ub);
   }
+  return 0;
 }
