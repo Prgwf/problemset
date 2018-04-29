@@ -8,101 +8,110 @@ ll gcd(ll a, ll b) { return b ? gcd(b, a % b) : a; }
 const int N = 100000 + 20;
 const int INF = 0x3f3f3f3f;
 
-string str;
-int p, m;
-
 struct Node {
-  int num;
+  int x;
   vector<shared_ptr<Node>> chs;
 
-  Node(int x)
-    : num(x), chs(2) {
+  Node(int value)
+    : x(value), chs(0) {
 
     }
-  Node(const shared_ptr<Node> &l, const shared_ptr<Node> & r)
-    : num(0), chs(0) {
-      chs.push_back(l);
-      chs.push_back(r);
+  Node(const shared_ptr<Node> &lch, const shared_ptr<Node> &rch)
+    : x(-1), chs(0) {
+      chs.push_back(lch);
+      chs.push_back(rch);
     }
 } ;
 
 shared_ptr<Node> build(const string & s, int & i) {
-  if (i == (int)s.size()) {
-    assert(false);
-  }
-
   if (isdigit(s[i])) {
-    shared_ptr<Node> it = make_shared<Node>(s[i] - '0');
+    shared_ptr<Node> o = make_shared<Node>(s[i] - '0');
     i++;
-    return it;
+    return o;
   } else if (s[i] == '(') {
     i++;
-
-    shared_ptr<Node> it(build(s, i));
+    shared_ptr<Node> lson(build(s, i));
     assert(s[i] == '?');
-
     i++;
-
-    shared_ptr<Node> root(build(s, i));
+    shared_ptr<Node> rson(build(s, i));
     assert(s[i] == ')');
-
     i++;
-
-    return make_shared<Node>(it, root);
-  } else {
-    assert(false);
+    return make_shared<Node>(lson, rson);
   }
 }
-vector<pair<int, int>> Solve(const shared_ptr<Node> & it, int Max, bool k) {
-  if (it->num == 0) {
-    vector<pair<int, int>> lv(Solve(it->chs[0], Max, k));
-    vector<pair<int, int>> rv(Solve(it->chs[1], Max, k));
-    
-    vector<pair<int, int>> ansv(min(Max + 1, int(lv.size() + rv.size())), {1e9, -1e9});
 
-    for (int i = 0; i < lv.size(); ++i) {
-      auto lp(lv[i]);
-      for (int j = 0; j < rv.size(); ++j) {
-        auto rp(rv[j]);
-        for (int d = 0; d < 2; ++d) {
-          if (i + j + d >= ansv.size()) continue;
-          int mx, mn;
-          if (d ^ k) {
-            mx = lp.second - rp.first;
-            mn = lp.first - rp.second;
-          } else {
-            mx = lp.second + rp.second;
-            mn = lp.first + rp.first;
-          }
-          ansv[i + j + d].first = min(ansv[i + j + d].first, mn);
-          ansv[i + j + d].second = max(ansv[i + j + d].second, mx);
+typedef pair<int, int> pii;
+vector<pii> dfs(const shared_ptr<Node> & o, int cnt, bool add) {
+  if (o->x != -1) {
+    vector<pii> leaf(1, {o->x, o->x});
+    return leaf;
+  }
+
+  vector<pii> L(dfs(o->chs[0], cnt, add));
+  vector<pii> R(dfs(o->chs[1], cnt, add));
+
+  vector<pii> ans(min(cnt + 1, (int)(L.size() + R.size())), {1e9, -1e9});
+  for (int i = 0; i < (int)L.size(); ++i) {
+    pii l(L[i]);
+    for (int j = 0; j < (int)R.size(); ++j) {
+      if (i + j >= ans.size()) break;
+
+      pii r(R[j]);
+      int max_ = -1e9, min_ = 1e9;
+      if (add) {
+        if (i + j + 1 < (int)ans.size()) {
+          max_ = l.second + r.second;
+          min_ = l.first + r.first;
+          ans[i+j+1].first = min(ans[i+j+1].first, min_);
+          ans[i+j+1].second = max(ans[i+j+1].second, max_);
+        }
+        if (i + j + 0 < (int)ans.size()) {
+          max_ = l.second - r.first;
+          min_ = l.first - r.second;
+          ans[i+j+0].first = min(ans[i+j+0].first, min_);
+          ans[i+j+0].second = max(ans[i+j+0].second, max_);
+        }
+      } else {
+        if (i + j + 1 < (int)ans.size()) {
+          max_ = l.second - r.first;
+          min_ = l.first - r.second;
+          ans[i+j+1].first = min(ans[i+j+1].first, min_);
+          ans[i+j+1].second = max(ans[i+j+1].second, max_);
+        }
+        if (i + j + 0 < (int)ans.size()) {
+          max_ = l.second + r.second;
+          min_ = l.first + r.first;
+          ans[i+j+0].first = min(ans[i+j+0].first, min_);
+          ans[i+j+0].second = max(ans[i+j+0].second, max_);
         }
       }
     }
-    return ansv;
-  } else {
-    vector<pair<int, int>> v(1, {it->num, it->num});
-    return v;
   }
+  return ans;
 }
 
-int main() {
-  cin.tie(0);
+int main(int args, char const *argv[]) {
+  // freopen("data.in", "r", stdin);
+  // freopen("data.out", "w", stdout);
+  cin.tie(nullptr);
   ios::sync_with_stdio(false);
 
-  cin >> str >> p >> m;
+  string str;
+  int P, M;
+  cin >> str >> P >> M;
+
   int i = 0;
   shared_ptr<Node> root = build(str, i);
 
-  int ans;
-  vector<pair<int, int>> v;
-  if (p > m) {
-    v = Solve(root, m, false);
-    ans = v[m].second;
+  vector<pii> ans;
+  int sum;
+  if (P > M) {
+    ans = dfs(root, M, 0);
+    sum = ans[M].second;
   } else {
-    v = Solve(root, p, true);
-    ans = v[p].second;
+    ans = dfs(root, P, 1);
+    sum = ans[P].second;
   }
-  cout << ans;
+  cout << sum;
   return 0;
 }
