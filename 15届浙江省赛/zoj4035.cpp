@@ -18,8 +18,8 @@ struct comp {
   }
 } ;
 int main() {
-  freopen("data.in", "r", stdin);
-  freopen("data.out", "w", stdout);
+  // freopen("data.in", "r", stdin);
+  // freopen("data.out", "w", stdout);
 
   cin.tie(0);
   ios::sync_with_stdio(false);
@@ -40,12 +40,12 @@ int main() {
       Q.push(make_pair(x, s));
     }
 
-    int sum = 0;
+    ll sum = 0;
     for (int i = m; i > 0; --i) {
       pair<int, string> u = Q.top();
       Q.pop();
 
-      sum += i * u.first;
+      sum += 1LL * i * u.first;
       ans.emplace_back(u.second);
     }
 
