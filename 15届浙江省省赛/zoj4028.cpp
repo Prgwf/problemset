@@ -12,7 +12,7 @@ const ll INF = 4e15;
 
 int n, f[N], lb[N], ub[N];
 int pos[N];
-vector<pair<int, int>> G[N];
+vector<vector<pair<int, int>>> G;
 void add_edge(int x, int y, int w) {
   G[x].emplace_back(y, w);
 }
@@ -58,21 +58,21 @@ int main(int args, char const *argv[]) {
   scanf("%d", &T);
   while (T--) {
     scanf("%d", &n);
-    for (int i = 1; i <= n + 1; ++i) G[i].clear();
-    for (int i = 1; i <= n; ++i) {
-      scanf("%d", f + i);
-    }
-    for (int i = 1; i <= n; ++i) {
-      scanf("%d %d", lb + i, ub + i);
-    }
+    for (int i = 1; i <= n; ++i) scanf("%d", f + i);
+    for (int i = 1; i <= n; ++i) scanf("%d %d", lb + i, ub + i);
+
+    G.clear();
+    G.resize(n + 2, vector<pair<int, int>>());
     int S = n + 1;
     memset(pos, 0, sizeof(pos));
     for (int i = 1; i <= n; ++i) {
-      add_edge(i, S, -lb[i]);
       add_edge(S, i, ub[i]);
+      add_edge(i, S, -lb[i]);
+
       if (pos[f[i] - 1]) {
         add_edge(i, pos[f[i] - 1], -1);
       }
+
       if (pos[f[i]]) {
         add_edge(pos[f[i]], i, 0);
       }
@@ -82,7 +82,8 @@ int main(int args, char const *argv[]) {
     vector<ll> ans;
     SPFA(n + 1, S, ans);
     for (int i = 1; i <= n; ++i) {
-      printf("%lld%c", ans[i], (i < n) ? ' ':'\n');
+      printf("%lld%c", ans[i], i < n ? ' ':'\n');
     }
   }
+  return 0;
 }
