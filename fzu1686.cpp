@@ -12,7 +12,7 @@ ll gcd(ll a, ll b) { return b ? gcd(b, a % b) : a; }
 const int N = 500 + 20;
 const int INF = 0x3f3f3f3f;
 
-struct DXL {
+struct DLX {
   int n, m, id;
   int U[N*N], D[N*N], L[N*N], R[N*N];
   int row[N*N], col[N*N];
