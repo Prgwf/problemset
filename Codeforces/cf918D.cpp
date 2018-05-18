@@ -1,45 +1,53 @@
 #include <bits/stdc++.h>
 using namespace std;
+typedef long long ll;
+const ll mod = 1000000007;
+#define lson o<<1
+#define rson o<<1|1
+ll powmod(ll a, ll b) {ll res=1;a%=mod;assert(b>=0);for(;b;b>>=1){if(b&1)res=res*a%mod;a=a*a%mod;}return res;}
+ll gcd(ll a, ll b) { return b ? gcd(b, a % b) : a; }
 
-vector<vector<pair<int, char>>> G;
-int dp[205][205][30];
+const int N = 100 + 20;
+const int INF = 0x3f3f3f3f;
 
-int dfs(int x, int y, int state) {
-  if (~dp[x][y][state])  return dp[x][y][state];
-  
-  int & now = dp[x][y][state];
-  for (auto pii : G[x]) {
+int n, m;
+vector<vector<pair<int, int>>> T;
+int f[105][105][30];
+bool dfs(int x, int y, int state) {
+  if (f[x][y][state] != -1) return f[x][y][state];
+
+  int & ans = f[x][y][state];
+  for (const pair<int, int> & pii : T[x]) {
     int v = pii.first;
-    int value = pii.second;
-    if (value < state) continue;
-    if (!dfs(y, v, value)) {
-      return now = 1;
+    int w = pii.second;
+    if (w < state) continue;
+    if (!dfs(y, v, w)) {
+      return ans = 1;
     }
   }
-  return now = 0;
+  return ans = 0;
 }
-int main() {
-  int n, m;
-  scanf("%d%d", &n, &m);
-  G.assign(n + 2, vector<pair<int, char>>());
+int main(int args, char const *argv[]) {
+  // freopen("data.in", "r", stdin);
+  // freopen("data.out", "w", stdout);
 
-  int x, y;
-  char ch[2];
+  scanf("%d %d", &n, &m);
+  T.assign(n + 1, vector<pair<int, int>>());
   for (int i = 0; i < m; ++i) {
-    scanf("%d%d%s", &x, &y, ch);
-    G[x].push_back({y, ch[0] - 'a'});
+    int x, y, w;
+    char s[2];
+    scanf("%d %d %s", &x, &y, s);
+    w = s[0] - 'a' + 1;
+    T[x].push_back({y, w});
   }
 
-  memset(dp, -1, sizeof(dp));
+  memset(f, -1, sizeof(f));
   for (int i = 1; i <= n; ++i) {
     for (int j = 1; j <= n; ++j) {
       dfs(i, j, 0);
-      if (dp[i][j][0]) {
-        cout << "A";
-      } else {
-        cout << "B";
-      }
+      if (f[i][j][0]) putchar('A'); else putchar('B');
     }
-    cout << endl;
+    puts("");
   }
+  return 0;
 }
