@@ -1,84 +1,93 @@
-#include <bits/stdc++.h>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<cmath>
+#include<algorithm>
+#include<string>
+#include<iostream>
+#include<sstream>
+#include<set>
+#include<map>
+#include<queue>
+#include<bitset>
+#include<vector>
+#include<limits.h>
+#include<assert.h>
 using namespace std;
 typedef long long ll;
 const ll mod = 1000000007;
+#define lson o<<1
+#define rson o<<1|1
 ll powmod(ll a, ll b) {ll res=1;a%=mod;assert(b>=0);for(;b;b>>=1){if(b&1)res=res*a%mod;a=a*a%mod;}return res;}
 ll gcd(ll a, ll b) { return b ? gcd(b, a % b) : a; }
 
+const int N = 2000000 + 20;
 const int INF = 0x3f3f3f3f;
-#define clr(x, i) memset((x), (i), sizeof((x)))
-const int maxn = 2e6 + 20;
-struct SAM {
-  int len[maxn * 2], link[maxn * 2], ch[maxn * 2][27];
-  int size, root, last;
-  void init() { size = last = 0, root = newnode(); }
-  int newnode(int x = 0) {
-    len[size] = x;
-    link[size] = -1;
-    clr(ch[size], -1);
-    return size++;
+
+struct state {
+  int len, link;
+  map<char, int> next;
+} ;
+state st[N * 2];
+int sz, last;
+void sa_init() {
+  sz = last = 0;
+  st[0].len = 0;
+  st[0].link = -1;
+  ++sz;
+}
+void sa_extend(int c) {
+  int cur = sz++;
+  st[cur].len = st[last].len + 1;
+  int p;
+  for (p = last; p != -1 && !st[p].next.count(c); p = st[p].link) {
+    st[p].next[c] = cur;
   }
-  void extend(int c) {
-    int np = newnode(len[last] + 1);
-    int p;
-    for (p = last; ~p && ch[p][c] == -1; p = link[p]) ch[p][c] = np;
-    if (p == -1) {
-        link[np] = root;
+  if (p == -1) {
+    st[cur].link = 0;
+  } else {
+    int q = st[p].next[c];
+    if (st[p].len + 1 == st[q].len) {
+      st[cur].link = q;
     } else {
-      int q = ch[p][c];
-      if (len[p] + 1 == len[q]) {
-        link[np] = q;
-      } else {
-        int nq = newnode(len[p] + 1);
-        memcpy(ch[nq], ch[q], sizeof(ch[q]));
-        link[nq] = link[q], link[q] = link[np] = nq;
-        for (; ~p && ch[p][c] == q; p = link[p]) ch[p][c] = nq;
+      int clone = sz++;
+      st[clone].len = st[p].len + 1;
+      st[clone].next = st[q].next;
+      st[clone].link = st[q].link;
+      for (; p != -1 && st[p].next[c] == q; p = st[p].link) {
+        st[p].next[c] = clone;
       }
+      st[q].link = st[cur].link = clone;
     }
-    last = np;
   }
-  int topcnt[maxn], topsam[maxn * 2];
-  void sort() { // 加入串后拓扑排序
-    clr(topcnt, 0);
-    for (int i = 0; i < size; i++) topcnt[len[i]]++;
-    for (int i = 0; i < maxn - 1; i++) topcnt[i + 1] += topcnt[i];
-    for (int i = 0; i < size; i++) topsam[--topcnt[len[i]]] = i;
-  }
-
-  ll dp[maxn * 2 + 5];
-  void solve(int k) {
-    sort();
-    ll ans = 0;
-    for (int i = size - 1; i >= 0; --i) {
-      int x = topsam[i];
-      if (link[x] < 0) ;
-      else if (len[link[x]] > k) ;
-      else {
-        ans += 1LL * min(k, len[x]) - 1LL*len[link[x]];
-      }
-    }
-    for (int i = 1; i <= k; ++i) {
-      ans -= 1LL * i;
-    }
-    printf("%lld\n", ans);
-  }
-} gao;
-
+  last = cur;
+}
 int n;
 string str;
-int main() {
-  ios::sync_with_stdio(false);
-  cin >> n;
-  cin >> str;
+int main(int args, char const *agrv[]) {
+  // freopen("data.in", "r", stdin);
+  // freopen("data.out", "w", stdout);
+  ios_base::sync_with_stdio(false); cin.tie(nullptr);
+  cin >> n >> str;
   str = str + str;
   string rev(str.rbegin(), str.rend());
   str.push_back('z' + 1);
   str = str + rev;
   int k = n;
   n = str.size();
-  gao.init();
-  for (int i = 0; i < n; ++i) {
-    gao.extend(str[i] - 'a');
+  
+  ll ans = 0;
+  sa_init();
+  for (int i = 0; i < n; ++i) sa_extend(str[i] - 'a');
+  for (int x = 0; x < sz; ++x) {
+    if (st[x].link < 0) continue;
+    if (st[st[x].link].len > k) continue;
+    ans += 1LL * min(k, st[x].len) - 1LL * st[st[x].link].len;
   }
-  gao.solve(k);
+  for (int i = 1; i <= k; ++i) ans -= i;
+  cout << ans;
+  return 0;
 }
+
+
+
