@@ -6,5 +6,11 @@
 *.JPEG
 *.exe
 
+.idea
 .vscode
-蔡队的题
+
+Workspace
+
+cmake-build-debug
+CMakeLists.txt
+
